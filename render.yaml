@@ -12,7 +12,11 @@ services:
     region: oregon
     branch: main
     buildCommand: pip install uv && uv sync --frozen
-    startCommand: uv run youtube-mcp
+    # `uv run youtube-mcp` is flaky on some uv/Python combinations — its editable
+    # install can produce a .pth file the interpreter fails to pick up, causing
+    # ModuleNotFoundError at start. Invoking the module directly with `src` on
+    # PYTHONPATH sidesteps that entirely and is what's used in local dev too.
+    startCommand: PYTHONPATH=src .venv/bin/python -m youtube_mcp.server
     numInstances: 1   # keep at 1 — the in-process cache and disk token store
                        # assume a single replica; scaling out needs Redis first.
     healthCheckPath: /mcp
