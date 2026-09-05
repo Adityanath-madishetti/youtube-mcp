@@ -22,3 +22,4 @@ dist/
 # Local tooling / screenshots — not project source
 .claude/
 *.png
+NOTES.md
