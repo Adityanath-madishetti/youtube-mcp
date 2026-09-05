@@ -1,0 +1,37 @@
+# Render Blueprint for the YouTube MCP server.
+#
+# A persistent disk at /data is required, not optional: FastMCP's GoogleProvider
+# stores DCR client registrations and encrypted upstream OAuth tokens on disk at
+# STORAGE_PATH. Without a real mounted disk, every redeploy wipes that state and
+# silently logs out every connected user.
+services:
+  - type: web
+    name: youtube-mcp
+    runtime: python
+    plan: starter
+    region: oregon
+    branch: main
+    buildCommand: pip install uv && uv sync --frozen
+    startCommand: uv run youtube-mcp
+    numInstances: 1   # keep at 1 — the in-process cache and disk token store
+                       # assume a single replica; scaling out needs Redis first.
+    healthCheckPath: /mcp
+    disk:
+      name: oauth-storage
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: JWT_SIGNING_KEY
+        sync: false
+      - key: STORAGE_ENCRYPTION_KEY
+        sync: false
+      - key: BASE_URL
+        sync: false   # set to this service's actual URL, e.g. https://youtube-mcp.onrender.com
+      - key: STORAGE_PATH
+        value: /data/oauth
+      - key: PORT
+        value: 8000

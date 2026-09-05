@@ -1,0 +1,34 @@
+[project]
+name = "youtube-mcp"
+version = "0.1.0"
+description = "Remote MCP server exposing a user's personal YouTube data (subscriptions, likes, playlists) to Claude via Google OAuth."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=4.0.3",
+    # FastMCP 4.x ships httpx2 (not httpx); we import it directly so pin it.
+    "httpx2>=2.12.0",
+    # Encrypted-at-rest OAuth token storage.
+    "cryptography>=45.0",
+    "py-key-value-aio[disk]>=0.4.5",
+]
+
+[project.scripts]
+youtube-mcp = "youtube_mcp.server:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.24"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/youtube_mcp"]
+
+[tool.uv]
+package = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
